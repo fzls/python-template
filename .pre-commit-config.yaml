@@ -1,0 +1,58 @@
+default_language_version:
+  python: python3
+exclude: |
+  (?x)
+      # 其他目录
+      ^(.mypy_cache|.pytest_cache|.venv|.venv_dev|.tox|logs)/
+repos:
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        language_version: python3.8
+        additional_dependencies:
+          - flake8-typing-imports==1.9.0
+          - flake8-bugbear == 20.11.1
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.31.0
+    hooks:
+      - id: pyupgrade
+        args: [ --py38-plus ]
+  - repo: https://github.com/psf/black
+    rev: 22.1.0
+    hooks:
+      - id: black
+        args: [ --safe, --quiet, --line-length=120 ]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: fix-encoding-pragma
+        args: [ --remove ]
+      - id: check-yaml
+      - id: debug-statements
+        language_version: python3
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+      - id: python-use-type-annotations
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.931
+    hooks:
+      - id: mypy
+        args: [ ]
+        additional_dependencies:
+          - iniconfig>=1.1.0
+          - py>=1.8.2
+          - attrs>=19.2.0
+          - packaging
+          - tomli
+          # 这里填写mypy需要的type库
+          - types-atomicwrites
+          - types-pkg_resources
+          - types-beautifulsoup4
