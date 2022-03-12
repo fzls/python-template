@@ -1,5 +1,6 @@
 import argparse
 
+from lib.hello_world import hello_world
 from log import logger, add_file_handler
 
 def parse_args():
@@ -17,6 +18,8 @@ def main():
     args = parse_args()
 
     logger.info(f"main: {args}")
+
+    hello_world()
 
 
 if __name__ == "__main__":
