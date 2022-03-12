@@ -1,7 +1,8 @@
 import argparse
 
 from lib.hello_world import hello_world
-from lib.log import logger, add_file_handler
+from lib.log import add_file_handler, logger
+
 
 def parse_args():
     parser = argparse.ArgumentParser()

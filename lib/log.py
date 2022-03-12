@@ -76,8 +76,9 @@ consoleHandler.setFormatter(consoleLogFormatter)
 consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
 
+
 # 文件输出需自行调用，不会默认创建
-def add_file_handler(log_directory = "logs", logger_name="", deal_with_multiprocessing = False):
+def add_file_handler(log_directory="logs", logger_name="", deal_with_multiprocessing=False):
     try:
         pathlib.Path(log_directory).mkdir(parents=True, exist_ok=True)
     except PermissionError:
@@ -88,7 +89,6 @@ def add_file_handler(log_directory = "logs", logger_name="", deal_with_multiproc
 
     # 如果传入了logger名称，则覆盖默认名称
     logger.name = logger_name or logger.name
-
 
     # 默认日志文件名以日志名称和当前时间组成
     time_str = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -127,6 +127,7 @@ def add_file_handler(log_directory = "logs", logger_name="", deal_with_multiproc
 
     logger.addHandler(fileHandler)
 
+
 def color(color_name):
     return consoleLogFormatter._get_escape_code(consoleLogFormatter.log_colors, color_name)
 
@@ -140,6 +141,7 @@ def get_log_func(log_func: Callable, show_log=True) -> Callable:
         return logger.debug
 
     return log_func
+
 
 if __name__ == "__main__":
     consoleHandler.setLevel(logging.DEBUG)
