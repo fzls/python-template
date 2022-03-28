@@ -1,4 +1,4 @@
-from lib.log import logger
+from log.log import logger
 
 
 def hello_world():
