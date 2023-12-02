@@ -1,7 +1,7 @@
 import argparse
 
 from hello_world import hello_world
-from log import add_file_handler, logger
+from log import logger
 
 
 def parse_args():
@@ -14,8 +14,6 @@ def parse_args():
 
 
 def main():
-    add_file_handler(logger_name="main", log_directory="logs", deal_with_multiprocessing=False)
-
     args = parse_args()
 
     logger.info(f"main: {args}")
