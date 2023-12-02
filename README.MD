@@ -10,6 +10,27 @@ python示例模板
 ## hello_world.py
 示例的逻辑代码，可以替换为实际的逻辑
 
+## _build.py
+编译打包成单个exe文件
+
+## _init_venv_and_requirements.py
+初始化venv并安装依赖
+
+## first_run.py
+提供接口判断是否是首次运行
+
+## dao.py/data_struct.py
+用于自动映射python结构体与dict对象，方便使用各个字段
+
+## db.py/db_def.py
+提供基于文件的数据存储操作
+
+## network.py
+封装requests的网络库，适合自己的使用习惯
+
+## util.py
+从小助手搬过来的一些工具函数
+
 # 其他文件说明
 ## .github
 ### dependabot.yml
