@@ -1,7 +1,7 @@
 import argparse
 
-from demo_package.hello_world import hello_world
-from log.log import add_file_handler, logger
+from hello_world import hello_world
+from log import add_file_handler, logger
 
 
 def parse_args():

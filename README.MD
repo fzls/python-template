@@ -2,10 +2,13 @@ python示例模板
 
 # 核心文件说明
 ## main.py
-主要入口，可以在其中调用lib包中的定义的子模块或者子包
+主要入口
 
-## lib
-在这里面可以添加新的模块或者子包，参照 [Python 模块](https://docs.python.org/3/tutorial/modules.html)
+## log.py
+封装日志相关操作
+
+## hello_world.py
+示例的逻辑代码，可以替换为实际的逻辑
 
 # 其他文件说明
 ## .github
