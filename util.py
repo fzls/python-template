@@ -31,7 +31,7 @@ import requests.exceptions
 import toml
 import urllib3.exceptions
 
-from const import cached_dir, db_top_dir
+from const import cached_dir
 from db import CacheDB, CacheInfo
 from log import asciiReset, color, get_log_func, logger
 
@@ -59,7 +59,9 @@ def check_some_exception(e: Exception, show_last_process_result=True) -> str:
         requests.exceptions.ConnectTimeout,
         requests.exceptions.ReadTimeout,
     ]:
-        msg += format_msg("网络超时了，一般情况下是因为网络问题，也有可能是因为对应网页的服务器不太行，多试几次就好了<_<（不用管，会自动重试的）")
+        msg += format_msg(
+            "网络超时了，一般情况下是因为网络问题，也有可能是因为对应网页的服务器不太行，多试几次就好了<_<（不用管，会自动重试的）"
+        )
     elif type(e) in [
         PermissionError,
     ]:
@@ -71,10 +73,14 @@ def check_some_exception(e: Exception, show_last_process_result=True) -> str:
     elif type(e) is OSError:
         # OSError: [WinError 1455] 页面文件太小，无法完成操作。
         if e.winerror == 1455:
-            msg += format_msg(f"当前电脑内存不足，请调小多进程相关配置。可将【配置工具/公共配置/多进程】调整为当前cpu的一半（{cpu_count() / 2}），或者其他合适的数值，或者关闭。")
+            msg += format_msg(
+                f"当前电脑内存不足，请调小多进程相关配置。可将【配置工具/公共配置/多进程】调整为当前cpu的一半（{cpu_count() / 2}），或者其他合适的数值，或者关闭。"
+            )
     elif type(e) is FileNotFoundError:
         # FileNotFoundError: [Errno 2] No such file or directory: 'config.toml'
-        msg += format_msg(f"文件 {e.filename} 不见了，很有可能是被杀毒软件删除了，请重新解压一份小助手来使用，同时最好将小助手所在文件夹添加到杀毒软件的白名单中")
+        msg += format_msg(
+            f"文件 {e.filename} 不见了，很有可能是被杀毒软件删除了，请重新解压一份小助手来使用，同时最好将小助手所在文件夹添加到杀毒软件的白名单中"
+        )
 
     if show_last_process_result:
         from network import last_response_info
@@ -82,7 +88,9 @@ def check_some_exception(e: Exception, show_last_process_result=True) -> str:
         if last_response_info is not None:
             lr = last_response_info
             text = parse_unicode_escape_string(lr.text)
-            msg += format_msg(f"最近一次收到的请求结果为：status_code={lr.status_code} reason={lr.reason} \n{text}", "bold_cyan")
+            msg += format_msg(
+                f"最近一次收到的请求结果为：status_code={lr.status_code} reason={lr.reason} \n{text}", "bold_cyan"
+            )
 
     return msg
 
@@ -184,7 +192,9 @@ def change_console_window_mode(cfg, disable_min_console=False):
         return
 
     if is_running_under_windows_terminal_in_win11():
-        logger.info(color("bold_yellow") + "检测到当前默认终端是 WindowsTerminal，为避免桌面卡住，将跳过最大化/最小化流程")
+        logger.info(
+            color("bold_yellow") + "检测到当前默认终端是 WindowsTerminal，为避免桌面卡住，将跳过最大化/最小化流程"
+        )
         async_message_box(
             (
                 "检测到当前默认终端是 WindowsTerminal，为避免桌面卡住，将跳过最大化/最小化流程\n"
@@ -304,9 +314,6 @@ def message_box(
 ):
     get_log_func(logger.warning, print_log)(color(color_name) + msg.replace("\n\n", "\n"))
 
-    if is_run_in_github_action():
-        return
-
     from first_run import is_daily_first_run, is_first_run, is_monthly_first_run
 
     show_message_box = True
@@ -321,17 +328,7 @@ def message_box(
 
     if show_message_box and is_windows():
         if use_qt_messagebox and not call_from_async:
-            from PyQt5.QtWidgets import QApplication
-
-            from qt_wrapper import show_message
-
-            # 初始化qt，方便使用qt的弹窗
-            qt_message_box_container = QApplication([])
-
-            show_message(title, msg, is_text_selectable=True, show_log=False)
-
-            # 清理
-            qt_message_box_container.quit()
+            pass
         else:
             win32api.MessageBox(0, msg, title, icon)
 
@@ -358,33 +355,6 @@ def get_resolution() -> str:
     return f"{width}x{height}"
 
 
-def show_unexpected_exception_message(e: Exception):
-    from config import Config, config
-
-    time_since_release = get_now() - parse_time(ver_time, "%Y.%m.%d")
-    cfg = Config()
-    try:
-        cfg = config()
-    except Exception:
-        pass
-    msg = (
-        f"ver {now_version} (发布于{ver_time}，距今已有{time_since_release.days}天啦) 运行过程中出现未捕获的异常，请加群{cfg.common.qq_group}反馈或自行解决。"
-        + check_some_exception(e)
-    )
-    logger.exception(color("fg_bold_yellow") + msg, exc_info=e)
-    logger.warning(color("fg_bold_cyan") + "如果稳定报错，不妨打开网盘，看看是否有新版本修复了这个问题~")
-    logger.warning(color("fg_bold_cyan") + "如果稳定报错，不妨打开网盘，看看是否有新版本修复了这个问题~")
-    logger.warning(color("fg_bold_cyan") + "如果稳定报错，不妨打开网盘，看看是否有新版本修复了这个问题~")
-    logger.warning(color("fg_bold_green") + "如果要反馈，请把整个窗口都截图下来- -不要只截一部分")
-    logger.warning(color("fg_bold_yellow") + "不要自动无视上面这三句话哦，写出来是让你看的呀<_<不知道出啥问题的时候就按提示去看看是否有新版本哇，而不是不管三七二十一就来群里问嗷")
-    logger.warning(color("fg_bold_cyan") + f"链接：{cfg.common.netdisk_link}")
-
-    if run_from_src():
-        show_head_line(
-            "目前使用的是源码版本，出现任何问题请自行调试或google解决，这是使用源码版本的前提。另外，在出问题时，建议先尝试更新依赖库，确保与依赖配置中的版本匹配。", color("bold_yellow")
-        )
-
-
 def disable_quick_edit_mode():
     if not is_windows():
         return
@@ -393,7 +363,10 @@ def disable_quick_edit_mode():
     def _cb():
         ENABLE_EXTENDED_FLAGS = 0x0080
 
-        logger.info(color("bold_green") + "将禁用命令行的快速编辑模式，避免鼠标误触时程序暂停，若需启用，请去配置文件取消禁用快速编辑模式~")
+        logger.info(
+            color("bold_green")
+            + "将禁用命令行的快速编辑模式，避免鼠标误触时程序暂停，若需启用，请去配置文件取消禁用快速编辑模式~"
+        )
         show_quick_edit_mode_tip()
         kernel32 = ctypes.windll.kernel32
         kernel32.SetConsoleMode(kernel32.GetStdHandle(win32api.STD_INPUT_HANDLE), ENABLE_EXTENDED_FLAGS)
@@ -403,28 +376,10 @@ def disable_quick_edit_mode():
 
 def show_quick_edit_mode_tip():
     logger.info(
-        color("bold_blue") + "当前已禁用快速编辑，如需复制链接，请先按 CTRL+M 临时开启选择功能，然后选择要复制的区域，按 CTRL+C 进行复制\n"
+        color("bold_blue")
+        + "当前已禁用快速编辑，如需复制链接，请先按 CTRL+M 临时开启选择功能，然后选择要复制的区域，按 CTRL+C 进行复制\n"
         "（如果点击后会退出，也可以点击命令栏左上角图标，编辑->标记，然后选择复制区域来复制即可）"
     )
-
-
-def change_title(
-    dlc_info="", monthly_pay_info="", multiprocessing_pool_size=0, enable_super_fast_mode=False, may_have_buy_dlc=True
-):
-    if dlc_info == "" and exists_auto_updater_dlc() and may_have_buy_dlc:
-        dlc_info = " 自动更新豪华升级版"
-
-    pool_info = ""
-    if multiprocessing_pool_size != 0:
-        pool_info = f"火力全开版本({multiprocessing_pool_size})"
-        if enable_super_fast_mode:
-            pool_info = "超级" + pool_info
-
-    set_title_cmd = f"title DNF蚊子腿小助手 {dlc_info} {monthly_pay_info} {pool_info} v{now_version} {ver_time} by风之凌殇 {get_random_face()}"
-    if is_windows():
-        os.system(set_title_cmd)
-    else:
-        logger.info(color("bold_yellow") + set_title_cmd)
 
 
 def gen_config_for_github_action_json_single_line(github_action_config_path="config.toml.github_action"):
@@ -855,7 +810,9 @@ def remove_old_version_portable_chrome_files(current_chrome_version: int):
     2. chrome_portable_{ver}.7z
     3. chrome_portable_{ver}
     """
-    logger.info(color("bold_green") + f"开始尝试清理非当前版本的便携版chrome相关文件，当前chrome版本为{current_chrome_version}")
+    logger.info(
+        color("bold_green") + f"开始尝试清理非当前版本的便携版chrome相关文件，当前chrome版本为{current_chrome_version}"
+    )
 
     chrome_file_regex = [
         r"chromedriver_(?P<version>\d+)\.exe",
@@ -1023,67 +980,10 @@ def make_sure_dir_exists(dir_path):
         os.makedirs(dir_path, exist_ok=True)
 
 
-def is_run_in_github_action():
-    return get_config_from_env() != ""
-
-
-def get_config_from_env() -> str:
-    # 先尝试第一个环境变量，直接获取 toml_str
-    toml_str = os.environ.get("DJC_HELPER_CONFIG_TOML", "")
-    if toml_str != "":
-        return toml_str
-
-    # 如果对应运行环境不方便设置多行的环境变量，则分别尝试可以单行的编码格式
-    # toml 配置编码为 base64
-    base64_str = os.environ.get("DJC_HELPER_CONFIG_BASE64", "")
-    if base64_str != "":
-        return base64_to_toml(base64_str)
-
-    # toml 配置先通过 lzma 压缩，然后编码为 base64
-    compressed_base64_str = os.environ.get("DJC_HELPER_CONFIG_LZMA_COMPRESSED_BASE64", "")
-    if compressed_base64_str != "":
-        return base64_to_toml(compressed_base64_str, compress_before_encode=True)
-
-    # toml 配置解析后再序列化为单行的 JSON 配置
-    json_str = os.environ.get("DJC_HELPER_CONFIG_SINGLE_LINE_JSON", "")
-    if json_str != "":
-        return json_to_toml(json_str)
-
-    return ""
-
-
-def gen_config_for_github_action_base64(
-    github_action_config_path="config.toml.github_action", compress_before_encode=False
-):
-    ctx = "base64版本"
-    target_filepath = f"{github_action_config_path}.base64"
-    if compress_before_encode:
-        ctx += "(压缩后转码)"
-        target_filepath = f"{github_action_config_path}.compressed.base64"
-
-    with open(github_action_config_path, encoding="utf-8") as toml_file:
-        with open(target_filepath, "w", encoding="utf-8") as save_file:
-            toml_bytes = toml_file.read().encode()
-            if compress_before_encode:
-                toml_bytes = compress_in_memory_with_lzma(toml_bytes)
-            base64_version = base64.standard_b64encode(toml_bytes).decode()
-            save_file.write(base64_version)
-
-    show_file_content_info(ctx, pathlib.Path(target_filepath).read_text())
-
-
 def show_file_content_info(ctx: str, file_content: str):
     total_size = len(file_content)
     total_lines = file_content.count("\n") + 1
     logger.info(f"{ctx} 生成配置文件大小为{total_size}({human_readable_size(total_size)})，总行数为{total_lines}")
-
-
-def base64_to_toml(github_action_config_base64: str, compress_before_encode=False) -> str:
-    toml_bytes = base64.standard_b64decode(github_action_config_base64.encode())
-    if compress_before_encode:
-        toml_bytes = decompress_in_memory_with_lzma(toml_bytes)
-
-    return toml_bytes.decode()
 
 
 def disable_pause_after_run() -> bool:
@@ -1155,7 +1055,9 @@ def with_cache(
 
         if cache_value_unmarshal_func is not None:
             cache_info.value = cache_value_unmarshal_func(cache_info.value)
-            logger.debug(f"{cache_category} {cache_key} 提供了反序列化函数，将对缓存数据进行转换，结果为 {cache_info.value}")
+            logger.debug(
+                f"{cache_category} {cache_key} 提供了反序列化函数，将对缓存数据进行转换，结果为 {cache_info.value}"
+            )
 
         cached_value = cache_info.value
 
@@ -1165,7 +1067,9 @@ def with_cache(
                 or cache_max_seconds == never_expired_cache_seconds
             ):
                 if cache_validate_func is None or cache_validate_func(cache_info.value):
-                    logger.debug(f"{cache_category} {cache_key} 本地缓存尚未过期，且检验有效，将使用缓存内容。缓存信息为 {cache_info}")
+                    logger.debug(
+                        f"{cache_category} {cache_key} 本地缓存尚未过期，且检验有效，将使用缓存内容。缓存信息为 {cache_info}"
+                    )
 
                     if cache_hit_func:
                         cache_hit_func(cache_info.value)
@@ -1205,12 +1109,6 @@ def reset_cache(cache_category: str):
 
 
 def count_down(ctx: str, seconds: float, update_interval=0.1):
-    if is_run_in_github_action():
-        # 在github action环境下直接sleep
-        logger.info(f"{ctx} wait for {seconds}seconds")
-        time.sleep(seconds)
-        return
-
     now_time = get_now()
     end_time = now_time + datetime.timedelta(seconds=seconds)
 
@@ -1435,66 +1333,6 @@ def start_djc_helper(exe_path: str):
     logger.info(f"{exe_path} 已经启动~")
 
 
-@try_except()
-def sync_configs(source_dir: str, target_dir: str):
-    """
-    将指定的配置相关文件从 源目录 覆盖到 目标目录
-    """
-    from config import config
-    from qq_login import QQLogin
-
-    sync_config_list = [
-        # 配置文件
-        "config.toml",
-        "config.toml.local",
-        # 特定功能的开关
-        ".disable_pause_after_run",
-        ".use_by_myself",
-        "不查询活动.txt",
-        ".no_message_box",
-        # 缓存文件所在目录
-        db_top_dir,
-        # # 自动更新DLC
-        # "utils/auto_updater.exe"
-    ]
-
-    cfg = config()
-    current_chrome_version = QQLogin(cfg.common).get_chrome_major_version()
-    sync_config_list.extend(
-        [
-            # chrome相关文件，避免反复下载
-            f"utils/chrome_portable_{current_chrome_version}.7z",
-            f"utils/chromedriver_{current_chrome_version}.exe",
-        ]
-    )
-
-    logger.debug(f"将以下配置从{source_dir} 复制并覆盖到 {target_dir}")
-
-    for filename in sync_config_list:
-        source = os.path.join(source_dir, filename)
-        destination = os.path.join(target_dir, filename)
-
-        if not os.path.exists(source):
-            logger.debug(f"旧版本目录未发现 {filename}，将跳过")
-            continue
-
-        if "config.toml" in filename and os.stat(source).st_size == 0:
-            logger.warning("旧版本中的配置文件是空文件，可能意外损坏了，将不覆盖到本地")
-            continue
-
-        # 确保要复制的目标文件所在目录存在
-        make_sure_dir_exists(os.path.dirname(destination))
-
-        if os.path.isdir(filename):
-            logger.debug(f"覆盖目录 {filename}")
-            remove_directory(destination)
-            shutil.copytree(source, destination)
-        else:
-            logger.debug(f"覆盖文件 {filename}")
-            remove_file(destination)
-            shutil.copyfile(source, destination)
-
-
 def start_and_end_date_of_a_month(date: datetime.datetime) -> Tuple[datetime.datetime, datetime.datetime]:
     """
     返回对应时间所在月的起始和结束时间点，形如 2021-07-01 00:00:00 和 2021-07-31 23:59:59
@@ -1699,54 +1537,10 @@ def clear_file(file_path: str):
         pass
 
 
-def demo_remove_chrome():
-    from config import config
-    from qq_login import QQLogin
-
-    cfg = config()
-    current_chrome_version = QQLogin(cfg.common).get_chrome_major_version()
-    remove_old_version_portable_chrome_files(current_chrome_version)
-
-
 def get_logger_func(print_warning: bool, logger_func=None):
     if logger_func is None:
         logger_func = logger.warning
     return logger_func if print_warning else logger.debug
-
-
-def download_chrome_driver(version: str, download_dir: str, dir_src_path: str) -> str:
-    from download import download_file
-
-    windows_zip_name = "chromedriver_win32"
-    windows_zip = f"{windows_zip_name}.zip"
-
-    latest_download_url = f"https://chromedriver.storage.googleapis.com/{version}/{windows_zip}"
-
-    logger.info(f"指定的chrome driver版本为: {version}，下载地址为 {latest_download_url}")
-
-    zip_file = download_file(latest_download_url, download_dir)
-    decompress_dir_with_bandizip(zip_file, dir_src_path=dir_src_path, dst_parent_folder=download_dir)
-
-    # 移除临时文件
-    remove_file(zip_file)
-
-    # 有时候解压出来会在子目录中，这里移动出来
-    windows_zip_name_dir = os.path.join(download_dir, windows_zip_name)
-    if os.path.isdir(windows_zip_name_dir):
-        shutil.move(f"{windows_zip_name_dir}/chromedriver.exe", "chromedriver.exe")
-        shutil.rmtree(windows_zip_name_dir)
-
-    # 重命名
-    major_version = parse_major_version(version)
-    chrome_driver = f"{download_dir}/chromedriver_{major_version}.exe"
-    shutil.move(f"{download_dir}/chromedriver.exe", chrome_driver)
-    logger.info(f"重命名为 {chrome_driver}")
-
-    final_path = os.path.realpath(chrome_driver)
-    version_info = subprocess.check_output([final_path, "--version"]).decode("utf-8")
-    logger.info(color("bold_green") + f"chrome获取完毕，chrome driver版本为 {version_info}")
-
-    return final_path
 
 
 def parse_major_version(latest_version: str) -> int:
@@ -1780,5 +1574,4 @@ if __name__ == "__main__":
 
     # message_box("测试弹窗内容", "测试标题", use_qt_messagebox=True)
 
-    demo_remove_chrome()
     pass

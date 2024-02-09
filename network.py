@@ -192,7 +192,9 @@ def process_result(
             except json.JSONDecodeError as e:
                 if e.msg == "Extra data":
                     # {"ret":0,"msg":"ok",...}{"ret":-5507,"msg":"很抱歉，系统繁忙，请等待10秒后再试！"...}
-                    logger.debug(f"道聚城似乎又抽风了，末尾多加了一个json串，尝试移除最后一个左括号及之后的内容，修改前 json_text 为 {json_text}")
+                    logger.debug(
+                        f"道聚城似乎又抽风了，末尾多加了一个json串，尝试移除最后一个左括号及之后的内容，修改前 json_text 为 {json_text}"
+                    )
                     json_text = json_text[: json_text.rindex("{")]
                     logger.debug(f"修改后 json_text 为 {json_text}")
                 else:
@@ -305,13 +307,13 @@ def jsonp2json(jsonpStr, is_normal_jsonp=True, need_unquote=True) -> dict:
     if is_normal_jsonp:
         left_idx = jsonpStr.index("(")
         right_idx = jsonpStr.rindex(")")
-        jsonpStr = jsonpStr[left_idx + 1: right_idx]
+        jsonpStr = jsonpStr[left_idx + 1 : right_idx]
         return json.loads(jsonpStr)
 
     # dnf返回的jsonp比较诡异，需要特殊处理
     left_idx = jsonpStr.index("{")
     right_idx = jsonpStr.rindex("}")
-    jsonpStr = jsonpStr[left_idx + 1: right_idx]
+    jsonpStr = jsonpStr[left_idx + 1 : right_idx]
 
     jsonRes = {}
     for kv in jsonpStr.split(","):
